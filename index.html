@@ -47,16 +47,66 @@
         ]
     }
     </script>
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            padding: 2rem 1.5rem;
+            font-family: 'Crimson Pro', serif;
+            background-color: #FAF9F6;
+            gap: 0;
+            text-align: center;
+        }
+
+        .label {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(0.85rem, 3vw, 1.25rem);
+            font-weight: 600;
+            color: #9E7647;
+            margin: 0;
+        }
+
+        .logotype {
+            width: min(600px, 85vw);
+            height: auto;
+            aspect-ratio: 600 / 80;
+            background-image: url('https://cdn.nusantarapost.co/logotype_tnpdotco.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .tagline {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: #555;
+            margin: 0.5rem 0 0;
+            font-weight: 600;
+        }
+
+        .domain {
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            color: #555;
+            margin: 0.35rem 0 0;
+            font-weight: 300;
+        }
+    </style>
 </head>
 
-<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Crimson Pro', serif; background-color: #FAF9F6; gap: 0;">
-    <p style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 600; color: #9E7647; margin: 0;">
-        Coming Soon...</p>
-    <div role="img" aria-label="The Nusantara Post"
-        style="background-image: url('https://cdn.nusantarapost.co/logotype_tnp.svg'); width: 600px; height: 80px; background-size: cover; background-repeat: no-repeat;">
-    </div>
-    <p style="font-size: 1.5rem; color: #555; margin: 0.5rem; font-weight: 600;">Indonesia N̵e̵w̵ News Capital</p>
-    <p style="font-size: 1rem; color: #555; margin: 0.5rem; font-weight: 300;">nusantarapost.co</p>
+<body>
+    <p class="label">Coming Soon...</p>
+    <div class="logotype" role="img" aria-label="The Nusantara Post"></div>
+    <p class="tagline">Indonesia N̵e̵w̵ News Capital</p>
+    <p class="domain">nusantarapost.co</p>
 </body>
 
 </html>
