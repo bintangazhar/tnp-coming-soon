@@ -27,7 +27,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap"
+        rel="stylesheet">
 
     <script type="application/ld+json">
     {
@@ -49,7 +51,9 @@
     </script>
 
     <style>
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
@@ -99,6 +103,20 @@
             margin: 0.35rem 0 0;
             font-weight: 300;
         }
+
+        .news-link {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+            font-weight: 500;
+            color: #9E7647;
+            text-decoration: none;
+            margin-top: 2rem;
+            transition: text-decoration 0.15s ease;
+        }
+
+        .news-link:hover {
+            text-decoration: underline;
+            }
     </style>
 </head>
 
@@ -107,6 +125,13 @@
     <div class="logotype" role="img" aria-label="The Nusantara Post"></div>
     <p class="tagline">Indonesia N̵e̵w̵ News Capital</p>
     <p class="domain">nusantarapost.co</p>
+<a href="https://www.nusantarapost.news" class="news-link" target="_blank" rel="noopener noreferrer">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </svg>
+    nusantarapost.news →
+</a>
 </body>
 
 </html>
