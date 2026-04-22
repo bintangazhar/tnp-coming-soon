@@ -10,7 +10,7 @@
         content="The Nusantara Post is Indonesia's premier English-language news destination. Covering politics, business, technology, culture, and more. Launching soon at nusantarapost.co">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://www.nusantarapost.co/">
-    <link rel="icon" href="https://cdn.nusantarapost.co/tnp-favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="https://cdn.nusantarapost.co/favicon-dark.svg" type="image/svg+xml">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.nusantarapost.co/">
@@ -52,6 +52,9 @@
         *::before,
         *::after {
             box-sizing: border-box;
+        --dark: #1a1a1a;
+        --light: #FAF9F6;
+        --brand-color: #DAAB74;
         }
 
         body {
@@ -64,16 +67,32 @@
             margin: 0;
             padding: 2rem 1.5rem;
             font-family: 'Crimson Pro', serif;
-            background-color: #FAF9F6;
+            background-color: #1a1a1a;
             gap: 0;
             text-align: center;
+            margin: 0;
+            min-height: 100vh;
+            background-image: radial-gradient(circle, rgba(218, 171, 116, 0.2) 1px, transparent 1px);
+            background-size: 1rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mouse-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(60rem circle at var(--x, 50%) var(--y, 50%),
+                    rgba(255, 255, 255, 0.01),
+                    transparent 60%);
+            transition: background 0.5s ease;
         }
 
         .label {
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: clamp(0.85rem, 3vw, 1.25rem);
             font-weight: 600;
-            color: #9E7647;
+            color: var(--brand-color);
             margin: 0;
         }
 
@@ -81,7 +100,7 @@
             width: min(600px, 85vw);
             height: auto;
             aspect-ratio: 600 / 80;
-            background-image: url('https://cdn.nusantarapost.co/logotype_tnp.svg');
+            background-image: url('https://cdn.nusantarapost.co/logotype_tnp_dark.svg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -89,14 +108,14 @@
 
         .tagline {
             font-size: clamp(1rem, 4vw, 1.5rem);
-            color: #555;
+            color: var(--light);
             margin: 0.5rem 0 0;
             font-weight: 600;
         }
 
         .domain {
             font-size: clamp(0.8rem, 3vw, 1rem);
-            color: #555;
+            color: var(--light);
             margin: 0.35rem 0 0;
             font-weight: 300;
         }
@@ -105,7 +124,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: clamp(0.75rem, 2.5vw, 0.9rem);
             font-weight: 500;
-            color: #9E7647;
+            color: var(--brand-color);
             text-decoration: none;
             margin-top: 2rem;
             transition: text-decoration 0.15s ease;
@@ -113,7 +132,7 @@
 
         .news-link:hover {
             text-decoration: underline;
-            }
+        }
 
         p {
             cursor: default;
@@ -122,17 +141,28 @@
 </head>
 
 <body>
+    <div class="mouse-glow" id="glow"> </div>
     <p class="label">Coming Soon...</p>
     <div class="logotype" role="img" aria-label="The Nusantara Post"></div>
     <p class="tagline">Indonesia N̵e̵w̵ News Capital</p>
     <p class="domain">nusantarapost.co</p>
-<a href="https://www.nusantarapost.news" class="news-link" target="_blank" rel="noopener noreferrer">
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-    </svg>
-    nusantarapost.news →
-</a>
+    <a href="https://www.nusantarapost.news" class="news-link" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="vertical-align: middle; margin-right: 4px;">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        nusantarapost.news →
+    </a>
 </body>
+<script>
+    const glow = document.getElementById('glow');
+
+    document.addEventListener('mousemove', (e) => {
+        glow.style.setProperty('--x', e.clientX + 'px');
+        glow.style.setProperty('--y', e.clientY + 'px');
+    });
+</script>
 
 </html>
