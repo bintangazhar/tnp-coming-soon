@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>The Nusantara Post - Indonesia's New News Capital | Coming Soon</title>
+    <title>The Nusantara Post - Indonesia N̵e̵w̵  News Capital | Coming Soon</title>
     <meta name="description"
         content="The Nusantara Post is Indonesia's premier English-language news destination. Covering politics, business, technology, culture, and more. Launching soon at nusantarapost.co">
     <meta name="robots" content="index, follow">
@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Plus+Jakarta+Sans:wght@500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap"
         rel="stylesheet">
 
     <script type="application/ld+json">
@@ -40,16 +40,20 @@
         "logo": "https://cdn.nusantarapost.co/tnp-favicon.svg",
         "description": "Indonesia's premier English-language news destination covering politics, business, technology, and culture.",
         "inLanguage": "en",
-        "foundingLocation": { "@type": "Place", "addressCountry": "ID" }
+        "foundingLocation": {
+            "@type": "Place",
+            "addressCountry": "ID"
+        }
     }
     </script>
 
     <style>
         :root {
             --dark: #1a1a1a;
+            --mid: #555;
             --light: #FAF9F6;
-            --brand: #DAAB74;
-            --bg: #111;
+            --brand-color: #DAAB74;
+            --secondary-color: #9E7647;
         }
 
         *,
@@ -63,14 +67,20 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
             min-height: 100dvh;
             margin: 0;
             padding: 2rem 1.5rem;
             font-family: 'Crimson Pro', serif;
-            background-color: var(--bg);
+            background-color: #111;
+            gap: 0;
             text-align: center;
             position: relative;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+             -moz-user-select: none;
+              -ms-user-select: none;
         }
 
         #glow {
@@ -81,30 +91,24 @@
             height: 100%;
         }
 
-        .label,
-        .logotype,
-        .tagline,
-        .domain,
-        .news-link {
-            position: relative;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-
         .label {
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: clamp(0.85rem, 3vw, 1.25rem);
             font-weight: 600;
             color: var(--light);
             margin: 0;
+            position: relative;
         }
 
         .logotype {
             width: min(600px, 85vw);
+            height: auto;
             aspect-ratio: 600 / 80;
-            background: url('https://cdn.nusantarapost.co/logotype_tnp_dark.svg') center/contain no-repeat;
+            background-image: url('https://cdn.nusantarapost.co/logotype_tnp_dark.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: relative;
         }
 
         .tagline {
@@ -112,32 +116,39 @@
             color: var(--light);
             margin: 0.5rem 0 0;
             font-weight: 600;
+            position: relative;
         }
 
         .domain {
             font-size: clamp(0.8rem, 3vw, 1rem);
             color: var(--light);
             margin: 0.35rem 0 0;
-            font-weight: 400;
+            font-weight: 300;
+            position: relative;
         }
 
         .news-link {
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: clamp(0.75rem, 2.5vw, 0.9rem);
             font-weight: 500;
-            color: var(--brand);
+            color: var(--brand-color);
             text-decoration: none;
             margin-top: 2rem;
+            position: relative;
         }
 
         .news-link:hover {
             text-decoration: underline;
         }
+
+        p {
+            cursor: default;
+        }
     </style>
 </head>
 
 <body>
-    <canvas id="glow" aria-hidden="true"></canvas>
+    <canvas class="mouse-glow" id="glow"></canvas>
     <p class="label">Coming Soon...</p>
     <div class="logotype" role="img" aria-label="The Nusantara Post"></div>
     <p class="tagline">Indonesia <s>New</s> News Capital</p>
@@ -145,113 +156,112 @@
     <a href="https://www.nusantarapost.news" class="news-link" target="_blank" rel="noopener noreferrer">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            style="vertical-align: middle; margin-right: 4px;" aria-hidden="true">
+            style="vertical-align: middle; margin-right: 4px;">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
         </svg>
-        nusantarapost.news &#8594;
+        nusantarapost.news →
     </a>
 
     <script>
-        (() => {
-            const canvas = document.getElementById('glow');
-            const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('glow');
+const ctx = canvas.getContext('2d');
 
-            const SPACING = 8;
-            const DOT_RADIUS = 1;
-            const GLOW_RADIUS = 90;
-            const FADE_EXTRA = 200;
-            const TOTAL_RADIUS = GLOW_RADIUS + FADE_EXTRA;
+let mouseX = -9999;
+let mouseY = -9999;
 
-            const r = 250;
-            const g = 249;
-            const b = 246;
+const SPACING = 8;
+const DOT_RADIUS = 1;
+const GLOW_RADIUS = 90;
+const FADE_EXTRA = 200;
 
-            let mouseX = -9999;
-            let mouseY = -9999;
-            let lastMouseX = null;
-            let lastMouseY = null;
+const r = 250;
+const g = 249;
+const b = 246;
 
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+resize();
+window.addEventListener('resize', resize);
+
+document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+}, { passive: true });
+
+document.addEventListener('mouseleave', () => {
+    mouseX = -9999;
+    mouseY = -9999;
+});
+
+document.addEventListener('touchmove', (e) => {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchstart', (e) => {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+    mouseX = -9999;
+    mouseY = -9999;
+}, { passive: true });
+
+let lastMouseX = null;
+let lastMouseY = null;
+
+function animate() {
+    if (mouseX === lastMouseX && mouseY === lastMouseY) {
+        requestAnimationFrame(animate);
+        return;
+    }
+
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const cols = Math.ceil(canvas.width / SPACING) + 1;
+    const rows = Math.ceil(canvas.height / SPACING) + 1;
+    const TOTAL_RADIUS = GLOW_RADIUS + FADE_EXTRA;
+
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            const x = i * SPACING;
+            const y = j * SPACING;
+            const dx = x - mouseX;
+            const dy = y - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            const isBright = (i % 4 < 2) && (j % 4 < 2);
+            const baseOpacity = isBright ? 0.10 : 0.05;
+
+            let opacity;
+            if (dist >= TOTAL_RADIUS) {
+                opacity = baseOpacity;
+            } else {
+                const glow = 1 - dist / TOTAL_RADIUS;
+                const eased = glow * glow * glow * glow * glow;
+                opacity = baseOpacity + eased * (isBright ? 0.75 : 0.5);
             }
 
-            resize();
-            window.addEventListener('resize', resize);
+            ctx.globalAlpha = opacity;
+            ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
+        }
+    }
 
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            }, { passive: true });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+}
 
-            document.addEventListener('mouseleave', () => {
-                mouseX = -9999;
-                mouseY = -9999;
-            });
-
-            document.addEventListener('touchmove', (e) => {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }, { passive: true });
-
-            document.addEventListener('touchstart', (e) => {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }, { passive: true });
-
-            document.addEventListener('touchend', () => {
-                mouseX = -9999;
-                mouseY = -9999;
-            }, { passive: true });
-
-            function animate() {
-                if (mouseX === lastMouseX && mouseY === lastMouseY) {
-                    requestAnimationFrame(animate);
-                    return;
-                }
-
-                lastMouseX = mouseX;
-                lastMouseY = mouseY;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                const cols = Math.ceil(canvas.width / SPACING) + 1;
-                const rows = Math.ceil(canvas.height / SPACING) + 1;
-
-                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-
-                for (let i = 0; i < cols; i++) {
-                    for (let j = 0; j < rows; j++) {
-                        const x = i * SPACING;
-                        const y = j * SPACING;
-                        const dx = x - mouseX;
-                        const dy = y - mouseY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-
-                        const isBright = (i % 4 < 2) && (j % 4 < 2);
-                        const baseOpacity = isBright ? 0.10 : 0.05;
-
-                        let opacity;
-                        if (dist >= TOTAL_RADIUS) {
-                            opacity = baseOpacity;
-                        } else {
-                            const glow = 1 - dist / TOTAL_RADIUS;
-                            const eased = glow * glow * glow * glow * glow;
-                            opacity = baseOpacity + eased * (isBright ? 0.75 : 0.5);
-                        }
-
-                        ctx.globalAlpha = opacity;
-                        ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
-                    }
-                }
-
-                ctx.globalAlpha = 1;
-                requestAnimationFrame(animate);
-            }
-
-            animate();
-        })();
+animate();
     </script>
 </body>
 
