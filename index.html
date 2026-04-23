@@ -207,8 +207,8 @@ document.addEventListener('touchend', () => {
     mouseY = -9999;
 }, { passive: true });
 
-let lastMouseX = mouseX;
-let lastMouseY = mouseY;
+let lastMouseX = null;
+let lastMouseY = null;
 
 function animate() {
     if (mouseX === lastMouseX && mouseY === lastMouseY) {
