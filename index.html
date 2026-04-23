@@ -188,6 +188,21 @@ document.addEventListener('mousemove', (e) => {
     mouseY = e.clientY;
 }, { passive: true });
 
+document.addEventListener('touchmove', (e) => {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchstart', (e) => {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+    mouseX = -9999;
+    mouseY = -9999;
+}, { passive: true });
+
 let lastMouseX = mouseX;
 let lastMouseY = mouseY;
 
