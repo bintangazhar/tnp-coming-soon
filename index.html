@@ -156,111 +156,175 @@
     </a>
     <script>
 
-        (() => {
-            const canvas = document.getElementById('glow');
-            const ctx = canvas.getContext('2d');
+      (() => {
+    const canvas = document.getElementById('glow');
+    const ctx = canvas.getContext('2d', { alpha: true });
 
-            const baseCanvas = document.createElement('canvas');
-            const bCtx = baseCanvas.getContext('2d');
+    // Offscreen canvas untuk cache base grid
+    const baseCanvas = document.createElement('canvas');
+    const bCtx = baseCanvas.getContext('2d');
 
-            let mouseX = -9999, mouseY = -9999;
-            let lastX = -1, lastY = -1;
+    // Config
+    const SPACING = 8;
+    const DOT_RADIUS = 1;
+    const DOT_SIZE = DOT_RADIUS * 2;
+    const GLOW_RADIUS = 90;
+    const FADE_EXTRA = 200;
+    const TOTAL_RADIUS = GLOW_RADIUS + FADE_EXTRA;
+    const TOTAL_RADIUS_SQ = TOTAL_RADIUS * TOTAL_RADIUS; // precompute
 
-            const SPACING = 8;
-            const DOT_RADIUS = 1;
-            const GLOW_RADIUS = 90;
-            const FADE_EXTRA = 200;
-            const TOTAL_RADIUS = GLOW_RADIUS + FADE_EXTRA;
+    const DOT_COLOR = 'rgb(250, 249, 246)';
 
-            const r = 250, g = 249, b = 246;
+    // Base opacity (saat dot jauh dari cursor)
+    const BASE_BRIGHT = 0.10;
+    const BASE_DIM = 0.05;
 
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                baseCanvas.width = canvas.width;
-                baseCanvas.height = canvas.height;
-                renderBaseGrid(); 
+    // Glow boost (ditambahkan ke base saat dot dekat cursor)
+    const GLOW_BRIGHT = 0.75;
+    const GLOW_DIM = 0.50;
+
+    let mouseX = -9999;
+    let mouseY = -9999;
+    let lastX = null;
+    let lastY = null;
+    let needsRedraw = true;
+
+    // Render base grid ke offscreen canvas (cuma dipanggil saat resize)
+    function renderBaseGrid() {
+        bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+        bCtx.fillStyle = DOT_COLOR;
+
+        const cols = Math.ceil(baseCanvas.width / SPACING);
+        const rows = Math.ceil(baseCanvas.height / SPACING);
+
+        for (let i = 0; i < cols; i++) {
+            const iMod = i % 4 < 2;
+            for (let j = 0; j < rows; j++) {
+                const isBright = iMod && (j % 4 < 2);
+                bCtx.globalAlpha = isBright ? BASE_BRIGHT : BASE_DIM;
+                bCtx.fillRect(
+                    i * SPACING - DOT_RADIUS,
+                    j * SPACING - DOT_RADIUS,
+                    DOT_SIZE,
+                    DOT_SIZE
+                );
             }
+        }
+        bCtx.globalAlpha = 1;
+    }
 
-    
-            function renderBaseGrid() {
-                bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
-                bCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    function resize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+        baseCanvas.width = w;
+        baseCanvas.height = h;
+        renderBaseGrid();
+        needsRedraw = true;
+    }
 
-                const cols = Math.ceil(baseCanvas.width / SPACING);
-                const rows = Math.ceil(baseCanvas.height / SPACING);
+    // Pointer handlers
+    const updatePointer = (x, y) => {
+        mouseX = x;
+        mouseY = y;
+    };
 
-                for (let i = 0; i < cols; i++) {
-                    for (let j = 0; j < rows; j++) {
-                        const isBright = (i % 4 < 2) && (j % 4 < 2);
-                        bCtx.globalAlpha = isBright ? 0.10 : 0.05;
-                        bCtx.fillRect(i * SPACING - DOT_RADIUS, j * SPACING - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
-                    }
-                }
+    const clearPointer = () => {
+        mouseX = -9999;
+        mouseY = -9999;
+    };
+
+    document.addEventListener('mousemove', (e) => {
+        updatePointer(e.clientX, e.clientY);
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', clearPointer);
+
+    document.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        updatePointer(t.clientX, t.clientY);
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        const t = e.touches[0];
+        updatePointer(t.clientX, t.clientY);
+    }, { passive: true });
+
+    document.addEventListener('touchend', clearPointer, { passive: true });
+    document.addEventListener('touchcancel', clearPointer, { passive: true });
+
+    window.addEventListener('resize', resize);
+
+    function animate() {
+        // Skip frame kalau mouse nggak gerak
+        if (!needsRedraw && mouseX === lastX && mouseY === lastY) {
+            requestAnimationFrame(animate);
+            return;
+        }
+        lastX = mouseX;
+        lastY = mouseY;
+        needsRedraw = false;
+
+        // Redraw base grid dari cache — 1 operasi GPU-accelerated
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(baseCanvas, 0, 0);
+
+        // Kalau mouse di luar viewport, cukup tampilkan base grid saja
+        if (mouseX < 0 || mouseY < 0) {
+            requestAnimationFrame(animate);
+            return;
+        }
+
+        // Hitung range grid yang perlu di-overlay glow
+        const startCol = Math.max(0, Math.floor((mouseX - TOTAL_RADIUS) / SPACING));
+        const endCol = Math.min(
+            Math.ceil(canvas.width / SPACING),
+            Math.ceil((mouseX + TOTAL_RADIUS) / SPACING)
+        );
+        const startRow = Math.max(0, Math.floor((mouseY - TOTAL_RADIUS) / SPACING));
+        const endRow = Math.min(
+            Math.ceil(canvas.height / SPACING),
+            Math.ceil((mouseY + TOTAL_RADIUS) / SPACING)
+        );
+
+        ctx.fillStyle = DOT_COLOR;
+
+        // Loop hanya dots yang berada di area glow
+        for (let i = startCol; i <= endCol; i++) {
+            const x = i * SPACING;
+            const dx = x - mouseX;
+            const dxSq = dx * dx;
+            const iMod = i % 4 < 2;
+
+            for (let j = startRow; j <= endRow; j++) {
+                const y = j * SPACING;
+                const dy = y - mouseY;
+                const distSq = dxSq + dy * dy;
+
+                // Short-circuit: skip sqrt kalau di luar radius
+                if (distSq >= TOTAL_RADIUS_SQ) continue;
+
+                const dist = Math.sqrt(distSq);
+                const isBright = iMod && (j % 4 < 2);
+
+                // Formula opacity eksplisit (dari Versi 2)
+                const glow = 1 - dist / TOTAL_RADIUS;
+                const eased = glow * glow * glow * glow * glow; // pow(5)
+                const glowBoost = eased * (isBright ? GLOW_BRIGHT : GLOW_DIM);
+
+                ctx.globalAlpha = glowBoost;
+                ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_SIZE, DOT_SIZE);
             }
+        }
 
-            window.addEventListener('resize', resize);
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(animate);
+    }
 
-            const updateMouse = (e) => {
-                mouseX = e.clientX || (e.touches && e.touches[0].clientX);
-                mouseY = e.clientY || (e.touches && e.touches[0].clientY);
-            };
-
-            document.addEventListener('mousemove', updateMouse, { passive: true });
-            document.addEventListener('touchmove', updateMouse, { passive: true });
-            document.addEventListener('touchstart', updateMouse, { passive: true });
-            document.addEventListener('touchend', () => { mouseX = -9999; mouseY = -9999; });
-            document.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
-
-            function animate() {
-                if (mouseX === lastX && mouseY === lastY) {
-                    requestAnimationFrame(animate);
-                    return;
-                }
-                lastX = mouseX; lastY = mouseY;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                
-                ctx.drawImage(baseCanvas, 0, 0);
-
-                
-                const startCol = Math.max(0, Math.floor((mouseX - TOTAL_RADIUS) / SPACING));
-                const endCol = Math.min(Math.ceil(canvas.width / SPACING), Math.ceil((mouseX + TOTAL_RADIUS) / SPACING));
-                const startRow = Math.max(0, Math.floor((mouseY - TOTAL_RADIUS) / SPACING));
-                const endRow = Math.min(Math.ceil(canvas.height / SPACING), Math.ceil((mouseY + TOTAL_RADIUS) / SPACING));
-
-                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-
-                for (let i = startCol; i <= endCol; i++) {
-                    for (let j = startRow; j <= endRow; j++) {
-                        const x = i * SPACING;
-                        const y = j * SPACING;
-                        const dx = x - mouseX;
-                        const dy = y - mouseY;
-                        const distSq = dx * dx + dy * dy;
-
-                        if (distSq < TOTAL_RADIUS * TOTAL_RADIUS) {
-                            const dist = Math.sqrt(distSq);
-                            const isBright = (i % 4 < 2) && (j % 4 < 2);
-
-                            const glow = 1 - dist / TOTAL_RADIUS;
-                            const eased = glow * glow * glow * glow * glow;
-
-                            // Hanya gambar selisih cahayanya (Glow)
-                            ctx.globalAlpha = eased * (isBright ? 0.75 : 0.5);
-                            ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
-                        }
-                    }
-                }
-
-                ctx.globalAlpha = 1;
-                requestAnimationFrame(animate);
-            }
-
-            resize();
-            animate();
-        })();
+    resize();
+    animate();
+})();
     </script>
 </body>
 
