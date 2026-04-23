@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Nusantara Post - Indonesia N̶e̶w̶ News Capital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Crimson Pro', serif; }
+        .font-sans-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+
+<body class="flex flex-col items-center justify-center min-h-screen bg-[#111] p-6 text-center overflow-hidden select-none">
+    
+    <canvas id="glow" class="fixed inset-0 pointer-events-none w-full h-full"></canvas>
+
+    <div class="relative z-10 flex flex-col items-center gap-2">
+        <p class="font-sans-jakarta text-[clamp(0.85rem,3vw,1.25rem)] font-semibold text-[#FAF9F6] opacity-80">
+            Coming Soon...
+        </p>
+        
+        <div class="w-[min(600px,85vw)] aspect-[600/80] bg-[url('https://cdn.nusantarapost.co/logotype_tnp_dark.svg')] bg-contain bg-no-repeat bg-center" 
+             role="img" aria-label="The Nusantara Post">
+        </div>
+
+        <p class="text-[clamp(1rem,4vw,1.5rem)] text-[#FAF9F6] font-semibold mt-2">
+            Indonesia <s class="opacity-50">New</s> News Capital
+        </p>
+
+        <p class="text-[clamp(0.8rem,3vw,1rem)] text-[#FAF9F6] font-light opacity-70">
+            nusantarapost.co
+        </p>
+
+        <a href="https://www.nusantarapost.news" 
+           class="font-sans-jakarta text-[clamp(0.75rem,2.5vw,0.9rem)] font-medium text-[#DAAB74] mt-8 hover:underline flex items-center gap-1 transition-all"
+           target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            nusantarapost.news →
+        </a>
+    </div>
+
+   <script>
+const canvas = document.getElementById('glow');
+const ctx = canvas.getContext('2d');
+
+// Canvas cadangan untuk menyimpan grid dasar agar tidak dihitung terus-menerus
+const baseCanvas = document.createElement('canvas');
+const bCtx = baseCanvas.getContext('2d');
+
+let mouseX = -9999, mouseY = -9999;
+let lastX = -1, lastY = -1;
+
+const SPACING = 8;
+const DOT_RADIUS = 1;
+const GLOW_RADIUS = 90;
+const FADE_EXTRA = 200;
+const TOTAL_RADIUS = GLOW_RADIUS + FADE_EXTRA;
+
+const r = 250, g = 249, b = 246;
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    baseCanvas.width = canvas.width;
+    baseCanvas.height = canvas.height;
+    renderBaseGrid(); // Gambar ulang grid dasar saat layar berubah
+}
+
+// Fungsi ini cuma jalan sekali (saat load/resize)
+function renderBaseGrid() {
+    bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+    bCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    
+    const cols = Math.ceil(baseCanvas.width / SPACING);
+    const rows = Math.ceil(baseCanvas.height / SPACING);
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            const isBright = (i % 4 < 2) && (j % 4 < 2);
+            bCtx.globalAlpha = isBright ? 0.10 : 0.05;
+            bCtx.fillRect(i * SPACING - DOT_RADIUS, j * SPACING - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
+        }
+    }
+}
+
+window.addEventListener('resize', resize);
+
+const updateMouse = (e) => {
+    mouseX = e.clientX || (e.touches && e.touches[0].clientX);
+    mouseY = e.clientY || (e.touches && e.touches[0].clientY);
+};
+
+document.addEventListener('mousemove', updateMouse, { passive: true });
+document.addEventListener('touchmove', updateMouse, { passive: true });
+document.addEventListener('touchstart', updateMouse, { passive: true });
+document.addEventListener('touchend', () => { mouseX = -9999; mouseY = -9999; });
+document.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+function animate() {
+    if (mouseX === lastX && mouseY === lastY) {
+        requestAnimationFrame(animate);
+        return;
+    }
+    lastX = mouseX; lastY = mouseY;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Gambar grid dasar yang sudah kita simpan (Sangat cepat!)
+    ctx.drawImage(baseCanvas, 0, 0);
+
+    // 2. Timpa dengan "Glow" hanya di area Bounding Box
+    const startCol = Math.max(0, Math.floor((mouseX - TOTAL_RADIUS) / SPACING));
+    const endCol = Math.min(Math.ceil(canvas.width / SPACING), Math.ceil((mouseX + TOTAL_RADIUS) / SPACING));
+    const startRow = Math.max(0, Math.floor((mouseY - TOTAL_RADIUS) / SPACING));
+    const endRow = Math.min(Math.ceil(canvas.height / SPACING), Math.ceil((mouseY + TOTAL_RADIUS) / SPACING));
+
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+
+    for (let i = startCol; i <= endCol; i++) {
+        for (let j = startRow; j <= endRow; j++) {
+            const x = i * SPACING;
+            const y = j * SPACING;
+            const dx = x - mouseX;
+            const dy = y - mouseY;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < TOTAL_RADIUS * TOTAL_RADIUS) {
+                const dist = Math.sqrt(distSq);
+                const isBright = (i % 4 < 2) && (j % 4 < 2);
+                
+                const glow = 1 - dist / TOTAL_RADIUS;
+                const eased = glow * glow * glow * glow * glow; 
+                
+                // Hanya gambar selisih cahayanya (Glow)
+                ctx.globalAlpha = eased * (isBright ? 0.75 : 0.5);
+                ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
+            }
+        }
+    }
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+}
+
+resize();
+animate();
+</script>
+</body>
+</html>
