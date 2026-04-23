@@ -30,7 +30,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Plus+Jakarta+Sans:wght@500;600&display=swap"
         rel="stylesheet">
-    <script defer src="https://analytics.nusantarapost.co/script.js" data-website-id="d2ac84a7-277b-4237-8097-42ad46e211b4"></script>
+    <script defer src="https://analytics.nusantarapost.co/script.js"
+        data-website-id="d2ac84a7-277b-4237-8097-42ad46e211b4"></script>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -43,7 +44,7 @@
         "foundingLocation": { "@type": "Place", "addressCountry": "ID" }
     }
     </script>
-    
+
 
     <style>
         :root {
@@ -156,94 +157,152 @@
     <script>
         (() => {
             const canvas = document.getElementById('glow');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { alpha: true });
+
+            const baseCanvas = document.createElement('canvas');
+            const bCtx = baseCanvas.getContext('2d');
 
             const SPACING = 8;
             const DOT_RADIUS = 1;
+            const DOT_SIZE = DOT_RADIUS * 2;
             const GLOW_RADIUS = 90;
             const FADE_EXTRA = 200;
             const TOTAL_RADIUS = GLOW_RADIUS + FADE_EXTRA;
+            const TOTAL_RADIUS_SQ = TOTAL_RADIUS * TOTAL_RADIUS; // precompute
 
-            const r = 250;
-            const g = 249;
-            const b = 246;
+            const DOT_COLOR = 'rgb(250, 249, 246)';
+
+            const BASE_BRIGHT = 0.10;
+            const BASE_DIM = 0.05;
+
+            const GLOW_BRIGHT = 0.75;
+            const GLOW_DIM = 0.50;
 
             let mouseX = -9999;
             let mouseY = -9999;
-            let lastMouseX = null;
-            let lastMouseY = null;
+            let lastX = null;
+            let lastY = null;
+            let needsRedraw = true;
 
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            function renderBaseGrid() {
+                bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+                bCtx.fillStyle = DOT_COLOR;
+
+                const cols = Math.ceil(baseCanvas.width / SPACING);
+                const rows = Math.ceil(baseCanvas.height / SPACING);
+
+                for (let i = 0; i < cols; i++) {
+                    const iMod = i % 4 < 2;
+                    for (let j = 0; j < rows; j++) {
+                        const isBright = iMod && (j % 4 < 2);
+                        bCtx.globalAlpha = isBright ? BASE_BRIGHT : BASE_DIM;
+                        bCtx.fillRect(
+                            i * SPACING - DOT_RADIUS,
+                            j * SPACING - DOT_RADIUS,
+                            DOT_SIZE,
+                            DOT_SIZE
+                        );
+                    }
+                }
+                bCtx.globalAlpha = 1;
             }
 
-            resize();
-            window.addEventListener('resize', resize);
+            function resize() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                canvas.width = w;
+                canvas.height = h;
+                baseCanvas.width = w;
+                baseCanvas.height = h;
+                renderBaseGrid();
+                needsRedraw = true;
+            }
+
+            const updatePointer = (x, y) => {
+                mouseX = x;
+                mouseY = y;
+            };
+
+            const clearPointer = () => {
+                mouseX = -9999;
+                mouseY = -9999;
+            };
 
             document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
+                updatePointer(e.clientX, e.clientY);
             }, { passive: true });
 
-            document.addEventListener('mouseleave', () => {
-                mouseX = -9999;
-                mouseY = -9999;
-            });
-
-            document.addEventListener('touchmove', (e) => {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-            }, { passive: true });
+            document.addEventListener('mouseleave', clearPointer);
 
             document.addEventListener('touchstart', (e) => {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
+                const t = e.touches[0];
+                updatePointer(t.clientX, t.clientY);
             }, { passive: true });
 
-            document.addEventListener('touchend', () => {
-                mouseX = -9999;
-                mouseY = -9999;
+            document.addEventListener('touchmove', (e) => {
+                const t = e.touches[0];
+                updatePointer(t.clientX, t.clientY);
             }, { passive: true });
+
+            document.addEventListener('touchend', clearPointer, { passive: true });
+            document.addEventListener('touchcancel', clearPointer, { passive: true });
+
+            window.addEventListener('resize', resize);
 
             function animate() {
-                if (mouseX === lastMouseX && mouseY === lastMouseY) {
+                if (!needsRedraw && mouseX === lastX && mouseY === lastY) {
+                    requestAnimationFrame(animate);
+                    return;
+                }
+                lastX = mouseX;
+                lastY = mouseY;
+                needsRedraw = false;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(baseCanvas, 0, 0);
+
+                if (mouseX < 0 || mouseY < 0) {
                     requestAnimationFrame(animate);
                     return;
                 }
 
-                lastMouseX = mouseX;
-                lastMouseY = mouseY;
+                const startCol = Math.max(0, Math.floor((mouseX - TOTAL_RADIUS) / SPACING));
+                const endCol = Math.min(
+                    Math.ceil(canvas.width / SPACING),
+                    Math.ceil((mouseX + TOTAL_RADIUS) / SPACING)
+                );
+                const startRow = Math.max(0, Math.floor((mouseY - TOTAL_RADIUS) / SPACING));
+                const endRow = Math.min(
+                    Math.ceil(canvas.height / SPACING),
+                    Math.ceil((mouseY + TOTAL_RADIUS) / SPACING)
+                );
 
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = DOT_COLOR;
 
-                const cols = Math.ceil(canvas.width / SPACING) + 1;
-                const rows = Math.ceil(canvas.height / SPACING) + 1;
+                for (let i = startCol; i <= endCol; i++) {
+                    const x = i * SPACING;
+                    const dx = x - mouseX;
+                    const dxSq = dx * dx;
+                    const iMod = i % 4 < 2;
 
-                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-
-                for (let i = 0; i < cols; i++) {
-                    for (let j = 0; j < rows; j++) {
-                        const x = i * SPACING;
+                    for (let j = startRow; j <= endRow; j++) {
                         const y = j * SPACING;
-                        const dx = x - mouseX;
                         const dy = y - mouseY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const distSq = dxSq + dy * dy;
 
-                        const isBright = (i % 4 < 2) && (j % 4 < 2);
-                        const baseOpacity = isBright ? 0.10 : 0.05;
+                        
+                        if (distSq >= TOTAL_RADIUS_SQ) continue;
 
-                        let opacity;
-                        if (dist >= TOTAL_RADIUS) {
-                            opacity = baseOpacity;
-                        } else {
-                            const glow = 1 - dist / TOTAL_RADIUS;
-                            const eased = glow * glow * glow * glow * glow;
-                            opacity = baseOpacity + eased * (isBright ? 0.75 : 0.5);
-                        }
+                        const dist = Math.sqrt(distSq);
+                        const isBright = iMod && (j % 4 < 2);
 
-                        ctx.globalAlpha = opacity;
-                        ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_RADIUS * 2, DOT_RADIUS * 2);
+
+                        const glow = 1 - dist / TOTAL_RADIUS;
+                        const eased = glow * glow * glow * glow * glow; // pow(5)
+                        const glowBoost = eased * (isBright ? GLOW_BRIGHT : GLOW_DIM);
+
+                        ctx.globalAlpha = glowBoost;
+                        ctx.fillRect(x - DOT_RADIUS, y - DOT_RADIUS, DOT_SIZE, DOT_SIZE);
                     }
                 }
 
@@ -251,6 +310,7 @@
                 requestAnimationFrame(animate);
             }
 
+            resize();
             animate();
         })();
     </script>
